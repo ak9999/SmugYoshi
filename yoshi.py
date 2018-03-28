@@ -8,7 +8,7 @@ import asyncio
 
 
 # Create bot
-bot = commands.Bot(command_prefix='?', description="Sample bot.")
+bot = commands.Bot(command_prefix='?', description="Very smug community management.")
 badwords = set()  # Set of words you may not like, no duplicates.
 
 
