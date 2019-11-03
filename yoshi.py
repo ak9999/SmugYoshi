@@ -8,8 +8,8 @@ import asyncio
 
 
 # Create bot
-bot = commands.Bot(command_prefix='?', description="Very smug community management.")
-badwords = set()  # Set of words you may not like, no duplicates.
+bot = commands.Bot(command_prefix='`', description="Very smug community management.")
+badwords = set()  # Set of words you may not like.
 
 
 try:
@@ -32,7 +32,7 @@ async def on_ready():
 
 
 @bot.command(description='For banning words.')
-async def blacklist(*words : str):
+async def blacklist(ctx, *words : str):
     '''Adds a word to the badwords list.'''
     global badwords
     for word in words:
@@ -40,15 +40,15 @@ async def blacklist(*words : str):
 
 
 @bot.command(description='Whispers current bad word set to user.')
-async def print_blacklist():
+async def print_blacklist(ctx):
     '''Prints out blacklist.'''
     global badwords
-    await bot.whisper(f'Banned words list: {str(badwords)}')
+    await ctx.author.send(f'Banned words list: {list(badwords)}')
 
 
 @bot.command(description="Echoes what the user said.")
-async def echo(*, message: str):
-    await bot.say(message)
+async def echo(ctx, *, message: str):
+    await ctx.send(message)
 
 
 @bot.command(pass_context=True)
@@ -56,13 +56,15 @@ async def joined_at(ctx, member: discord.Member = None):
     '''Bot says when the user joined the server.'''
     if member is None:
         member = ctx.message.author
-    await bot.say(f'{member} joined at {member.joined_at}')
+    await ctx.send(f'{member} joined at {member.joined_at}')
 
 
 @bot.listen('on_message')
 async def del_badwords(message):
-    if set(re.split('[\'\"\[\]{}()\s]', message.content.lower())) & badwords:
-        await bot.delete_message(message)
+    if message.author.id != bot.user.id:
+        # Don't delete messages the bot says.
+        if set(re.split('[\'\"\[\]{}()\s]', message.content.lower())) & badwords:
+            await message.delete()
 
 
 bot.run(auth_token)  # Run needs to be passed a bot token in string form.
